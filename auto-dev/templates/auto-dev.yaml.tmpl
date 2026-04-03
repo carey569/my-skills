@@ -1,0 +1,25 @@
+# .auto-dev.yaml — auto-dev skill 项目配置
+# 由 /auto-dev init 自动生成，可手动调整
+
+version: "0.1.0"
+
+project:
+  language: ""              # go / python / typescript / rust / java
+  test_cmd: ""              # 项目的测试命令
+  build_cmd: ""             # 项目的构建命令
+  lint_cmd: ""              # 项目的 lint 命令 (可选)
+
+infra:
+  container: null           # docker-compose / dockerfile / null
+  compose_file: ""          # docker-compose 文件路径
+  health_check: ""          # 健康检查命令
+  database: null            # mysql / postgres / sqlite / mongo / null
+  cache: null               # redis / memcached / null
+
+policy:
+  unit_max_retries: 5       # 单元测试自愈上限
+  integration_max_retries: 3 # 集成测试自愈上限
+  complexity_threshold: 3   # 改几个文件以上算 L 级别
+  require_approval: true    # 是否要求人审批验证方案
+
+frozen_files: []            # Phase B 审批后自动追加

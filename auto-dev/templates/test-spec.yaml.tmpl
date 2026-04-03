@@ -1,0 +1,19 @@
+# test-specs/<module-name>.yaml
+# 由 /auto-dev spec 生成，人审批后冻结
+
+module: ""                    # 模块路径
+approved: false               # 人审批后改为 true
+
+specs:
+  - name: ""                  # 测试函数名 (英文 snake_case)
+    desc: ""                  # 中文描述
+    preconditions:            # 前置条件 (自然语言)
+      - ""
+    input:                    # 输入参数 (key-value)
+      key: "value"
+    expect:                   # 预期断言 (自然语言)
+      - "response.xxx == yyy"
+    edge_cases:               # 边界条件 (可选)
+      - name: ""
+        input: {}
+        expect: []
