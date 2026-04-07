@@ -13,7 +13,8 @@
 #
 set -euo pipefail
 
-INSTALL_DIR="${CLAUDE_SKILLS_DIR:-$HOME/.claude/skills}"
+REPO_NAME="my-skills"
+INSTALL_DIR="${CLAUDE_SKILLS_DIR:-$HOME/.claude/$REPO_NAME}"
 REPO_URL="git@github.com:carey569/my-skills.git"
 COMMANDS_DIR="$HOME/.claude/commands"
 
@@ -80,12 +81,27 @@ SOURCE_DIR="$(detect_source_dir)"
 
 # If no local source found, clone the repo
 if [[ -z "$SOURCE_DIR" ]]; then
-    step "Cloning my-skills"
-    if command -v git &>/dev/null; then
-        git clone "$REPO_URL" "$INSTALL_DIR"
-    else
+    if ! command -v git &>/dev/null; then
         echo "Error: git is required. Install git and try again."
         exit 1
+    fi
+
+    if [[ -d "$INSTALL_DIR/.git" ]]; then
+        # Directory exists and is a git repo, but not ours — could be a different repo
+        step "Pulling into existing repo at $INSTALL_DIR"
+        git -C "$INSTALL_DIR" pull --ff-only 2>/dev/null || info "Pull skipped"
+    elif [[ -d "$INSTALL_DIR" ]]; then
+        # Directory exists but is not a git repo (or is something else)
+        # Clone into a temp dir and move contents in
+        step "Cloning my-skills (merging into existing $INSTALL_DIR)"
+        TMPDIR=$(mktemp -d)
+        git clone "$REPO_URL" "$TMPDIR/$REPO_NAME"
+        # Move .git and repo files into the existing directory
+        cp -a "$TMPDIR/$REPO_NAME/." "$INSTALL_DIR/"
+        rm -rf "$TMPDIR"
+    else
+        step "Cloning my-skills"
+        git clone "$REPO_URL" "$INSTALL_DIR"
     fi
     SOURCE_DIR="$INSTALL_DIR"
 else

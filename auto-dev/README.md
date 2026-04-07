@@ -13,8 +13,8 @@ curl -fsSL https://raw.githubusercontent.com/carey569/my-skills/master/install.s
 或手动安装：
 
 ```bash
-git clone git@github.com:carey569/my-skills.git ~/.claude/skills
-cd ~/.claude/skills
+git clone git@github.com:carey569/my-skills.git ~/.claude/my-skills
+cd ~/.claude/my-skills
 bash install.sh
 ```
 
@@ -23,13 +23,13 @@ bash install.sh
 ## 卸载
 
 ```bash
-bash ~/.claude/skills/install.sh --uninstall
+bash ~/.claude/my-skills/install.sh --uninstall
 ```
 
 ## 升级
 
 ```bash
-cd ~/.claude/skills && git pull && bash install.sh
+cd ~/.claude/my-skills && git pull && bash install.sh
 ```
 
 由于是符号链接，`git pull` 后已有命令自动更新，`install.sh` 只需在新增命令时重跑。
