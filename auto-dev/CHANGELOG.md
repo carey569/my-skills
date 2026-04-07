@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.3.0 (2026-04-07)
+
+### Breaking Changes
+- `install.sh` no longer injects rules into `~/.claude/CLAUDE.md` — all rules are now self-contained in command files
+- Running `install.sh` will auto-clean legacy CLAUDE.md injections from v0.1.0/v0.2.0
+
+### New Features
+- **One-liner install**: `curl -fsSL https://raw.githubusercontent.com/carey569/my-skills/master/install.sh | bash`
+- install.sh auto-detects local vs remote mode: clones if needed, pulls if already installed
+- Remote uninstall via `curl ... | bash -s -- --uninstall`
+
+### Improvements
+- Command files are fully self-contained — no external rule injection needed
+- "先理解再动手" and "错误脱敏" rules merged into each command's 执行原则/重要原则
+- `auto-dev/rules/auto-dev-rules.md` retained as documentation reference only
+- Simpler install: only symlinks, no file injection, no markers to maintain
+
 ## 0.2.0 (2026-04-07)
 
 ### Breaking Changes

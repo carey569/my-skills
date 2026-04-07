@@ -1,45 +1,74 @@
 #!/bin/bash
 # install.sh — Install / upgrade / uninstall auto-dev skills for Claude Code
+#
+# One-liner install:
+#   curl -fsSL https://raw.githubusercontent.com/carey569/my-skills/master/install.sh | bash
+#
+# Local install (after git clone):
+#   bash install.sh
+#
+# Uninstall:
+#   bash install.sh --uninstall
+#   curl -fsSL https://raw.githubusercontent.com/carey569/my-skills/master/install.sh | bash -s -- --uninstall
+#
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+INSTALL_DIR="${CLAUDE_SKILLS_DIR:-$HOME/.claude/skills}"
+REPO_URL="git@github.com:carey569/my-skills.git"
 COMMANDS_DIR="$HOME/.claude/commands"
-CLAUDE_MD="$HOME/.claude/CLAUDE.md"
-RULES_FILE="$SCRIPT_DIR/auto-dev/rules/auto-dev-rules.md"
-VERSION=$(cat "$SCRIPT_DIR/auto-dev/VERSION")
-MARKER_BEGIN="<!-- auto-dev rules BEGIN v${VERSION} -->"
-MARKER_END="<!-- auto-dev rules END -->"
-MARKER_PATTERN="<!-- auto-dev rules BEGIN"
+
+# ============================================================
+# Helpers
+# ============================================================
+
+info()  { echo "  $*"; }
+step()  { echo "=== $* ==="; }
+
+# Determine the source directory (repo root with auto-dev/ inside).
+# If running from within the repo, use that. Otherwise use INSTALL_DIR.
+detect_source_dir() {
+    # Check if this script is inside the repo (local run / already cloned)
+    local script_dir
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd)" || true
+
+    if [[ -n "$script_dir" && -d "$script_dir/auto-dev/commands" ]]; then
+        echo "$script_dir"
+    elif [[ -d "$INSTALL_DIR/auto-dev/commands" ]]; then
+        echo "$INSTALL_DIR"
+    else
+        echo ""
+    fi
+}
 
 # ============================================================
 # Uninstall
 # ============================================================
 
 if [[ "${1:-}" == "--uninstall" ]]; then
-    echo "=== Uninstalling auto-dev skills ==="
+    step "Uninstalling auto-dev skills"
+
+    SOURCE_DIR="$(detect_source_dir)"
 
     # Remove command symlinks
-    for cmd in "$SCRIPT_DIR"/auto-dev/commands/*.md; do
-        name=$(basename "$cmd")
-        target="$COMMANDS_DIR/$name"
-        if [ -L "$target" ]; then
-            rm "$target"
-            echo "  Removed: $name"
-        fi
-    done
+    if [[ -d "$COMMANDS_DIR" ]]; then
+        for target in "$COMMANDS_DIR"/auto-dev*.md "$COMMANDS_DIR"/fix-bug.md "$COMMANDS_DIR"/add-feature.md; do
+            [[ -e "$target" || -L "$target" ]] || continue
+            rm -f "$target"
+            info "Removed: $(basename "$target")"
+        done
+    fi
 
-    # Remove injected rules from CLAUDE.md
-    if [ -f "$CLAUDE_MD" ] && grep -qF "$MARKER_PATTERN" "$CLAUDE_MD" 2>/dev/null; then
-        # Remove everything between BEGIN and END markers (inclusive)
-        sed -i.bak "/$MARKER_PATTERN/,/$MARKER_END/d" "$CLAUDE_MD"
-        # Remove trailing blank lines
-        sed -i.bak -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$CLAUDE_MD"
+    # Clean up legacy CLAUDE.md injection (from v0.1.0 / v0.2.0)
+    CLAUDE_MD="$HOME/.claude/CLAUDE.md"
+    if [[ -f "$CLAUDE_MD" ]] && grep -qF "<!-- auto-dev rules BEGIN" "$CLAUDE_MD" 2>/dev/null; then
+        sed -i.bak '/<!-- auto-dev rules BEGIN/,/<!-- auto-dev rules END -->/d' "$CLAUDE_MD"
         rm -f "$CLAUDE_MD.bak"
-        echo "  Removed rules from CLAUDE.md"
+        info "Cleaned legacy rules from CLAUDE.md"
     fi
 
     echo ""
-    echo "Uninstall complete."
+    echo "Uninstall complete. Repo at $INSTALL_DIR was not removed."
+    echo "To fully remove: rm -rf $INSTALL_DIR"
     exit 0
 fi
 
@@ -47,56 +76,61 @@ fi
 # Install / Upgrade
 # ============================================================
 
-echo "=== Installing auto-dev skills (v${VERSION}) ==="
+SOURCE_DIR="$(detect_source_dir)"
+
+# If no local source found, clone the repo
+if [[ -z "$SOURCE_DIR" ]]; then
+    step "Cloning my-skills"
+    if command -v git &>/dev/null; then
+        git clone "$REPO_URL" "$INSTALL_DIR"
+    else
+        echo "Error: git is required. Install git and try again."
+        exit 1
+    fi
+    SOURCE_DIR="$INSTALL_DIR"
+else
+    # If running from INSTALL_DIR, pull latest
+    if [[ "$SOURCE_DIR" == "$INSTALL_DIR" ]] && [[ -d "$INSTALL_DIR/.git" ]]; then
+        step "Updating my-skills"
+        git -C "$INSTALL_DIR" pull --ff-only 2>/dev/null || info "Pull skipped (not on a tracking branch or offline)"
+    fi
+fi
+
+VERSION=$(cat "$SOURCE_DIR/auto-dev/VERSION" 2>/dev/null || echo "unknown")
+step "Installing auto-dev skills (v${VERSION})"
 
 # 1. Create commands directory
 mkdir -p "$COMMANDS_DIR"
 
 # 2. Symlink skill command files
-for cmd in "$SCRIPT_DIR"/auto-dev/commands/*.md; do
+for cmd in "$SOURCE_DIR"/auto-dev/commands/*.md; do
     name=$(basename "$cmd")
     target="$COMMANDS_DIR/$name"
-    if [ -L "$target" ]; then
+
+    # Clean up existing (symlink or regular file)
+    if [[ -L "$target" ]]; then
         rm "$target"
-    elif [ -f "$target" ]; then
-        echo "  Warning: $target is a regular file (not a symlink), backing up to ${target}.bak"
+    elif [[ -f "$target" ]]; then
+        info "Warning: $target is a regular file, backing up to ${target}.bak"
         mv "$target" "${target}.bak"
     fi
+
     ln -sf "$cmd" "$target"
-    echo "  Linked: $name"
+    info "Linked: $name"
 done
 
-# 3. Inject or update rules in CLAUDE.md
-if [ ! -f "$CLAUDE_MD" ]; then
-    touch "$CLAUDE_MD"
+# 3. Clean up legacy CLAUDE.md injection (from v0.1.0 / v0.2.0)
+#    v0.3.0+ no longer injects into CLAUDE.md — commands are self-contained
+CLAUDE_MD="$HOME/.claude/CLAUDE.md"
+if [[ -f "$CLAUDE_MD" ]] && grep -qF "<!-- auto-dev rules BEGIN" "$CLAUDE_MD" 2>/dev/null; then
+    sed -i.bak '/<!-- auto-dev rules BEGIN/,/<!-- auto-dev rules END -->/d' "$CLAUDE_MD"
+    rm -f "$CLAUDE_MD.bak"
+    info "Cleaned legacy rules from CLAUDE.md (no longer needed)"
 fi
 
-RULES_CONTENT=$(cat "$RULES_FILE")
-
-if grep -qF "$MARKER_PATTERN" "$CLAUDE_MD" 2>/dev/null; then
-    # Upgrade: replace existing rules block
-    # Create temp file with updated content
-    TEMP_FILE=$(mktemp)
-    awk -v begin="$MARKER_PATTERN" -v end="$MARKER_END" -v new_begin="$MARKER_BEGIN" -v content="$RULES_CONTENT" -v new_end="$MARKER_END" '
-        $0 ~ begin { skip=1; print new_begin; print content; print new_end; next }
-        $0 ~ end { skip=0; next }
-        !skip { print }
-    ' "$CLAUDE_MD" > "$TEMP_FILE"
-    mv "$TEMP_FILE" "$CLAUDE_MD"
-    echo "  Updated rules in CLAUDE.md (v${VERSION})"
-else
-    # Fresh install: append rules block
-    {
-        echo ""
-        echo "$MARKER_BEGIN"
-        cat "$RULES_FILE"
-        echo "$MARKER_END"
-    } >> "$CLAUDE_MD"
-    echo "  Injected rules into CLAUDE.md (v${VERSION})"
-fi
-
+# 4. Done
 echo ""
-echo "Done! Available skills:"
+echo "Done! Available commands:"
 echo "  /auto-dev            Full development & verification workflow"
 echo "  /auto-dev-init       Project environment detection"
 echo "  /auto-dev-spec       Test spec generation"
