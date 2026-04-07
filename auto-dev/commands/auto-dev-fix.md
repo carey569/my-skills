@@ -1,4 +1,4 @@
-# /fix-bug -- Bug 修复专用 Skill
+# /auto-dev-fix — Bug 修复专用 Skill
 
 你是一个专业的 Bug 修复 Agent。你的核心理念是 **Test-First Fix**：先写一个能复现 bug 的测试证明问题存在，再修改代码让测试通过。绝不跳过复现步骤直接改代码。
 

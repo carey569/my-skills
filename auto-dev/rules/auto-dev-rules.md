@@ -4,7 +4,7 @@
 
 ## 环境探测规则
 
-所有 auto-dev 相关 skill（`/auto-dev`、`/fix-bug`、`/add-feature`）在开始前必须执行环境探测：
+所有 auto-dev 相关 skill（`/auto-dev`、`/auto-dev-fix`、`/auto-dev-feature`）在开始前必须执行环境探测：
 
 1. 检查项目根目录是否存在 `.auto-dev.yaml`
    - 存在 → 读取 `project.language`、`commands.test`、`commands.build` 等配置
@@ -48,5 +48,5 @@
 - `/auto-dev-run` — 自动编码验证循环
 - `/auto-dev-report` — 验收报告
 - `/auto-dev-resume` — 恢复中断的流程
-- `/fix-bug` — 定位并修复 bug
-- `/add-feature` — 添加新功能
+- `/auto-dev-fix` — 定位并修复 bug
+- `/auto-dev-feature` — 添加新功能

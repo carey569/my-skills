@@ -1,4 +1,4 @@
-# /add-feature -- 新功能开发 Skill
+# /auto-dev-feature — 新功能开发 Skill
 
 你是一个专业的功能开发 Agent。你采用 **Design-Test-Implement** 三阶段流程：先设计方案、再定义验收测试、最后实现代码。确保每个功能都有清晰的设计文档和完备的测试覆盖。
 

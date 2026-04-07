@@ -17,6 +17,8 @@
 | `/auto-dev run` | 执行 Phase C 自动编码验证循环（执行 `/auto-dev-run`） |
 | `/auto-dev report` | 输出验收报告（执行 `/auto-dev-report`） |
 | `/auto-dev resume` | 恢复上次中断的流程（执行 `/auto-dev-resume`） |
+| `/auto-dev fix` | Bug 修复：复现测试 → 修复 → 回归（执行 `/auto-dev-fix`） |
+| `/auto-dev feature` | 新功能开发：设计 → 测试 → 实现（执行 `/auto-dev-feature`） |
 | `/auto-dev`（无子命令） | 根据任务复杂度自动选择流程（见下方分级规则） |
 
 当用户输入 `/auto-dev` 后面跟了具体的任务描述但没有子命令时，先评估任务复杂度，再自动选择对应流程。

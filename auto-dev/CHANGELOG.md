@@ -40,7 +40,7 @@
 ## 0.1.0 (2026-04-03)
 
 - Initial release
-- Core skills: `/auto-dev`, `/fix-bug`, `/add-feature`
+- Core skills: `/auto-dev`, `/auto-dev-fix`, `/auto-dev-feature`
 - Language support: Go, Python, TypeScript, Rust, Java
 - Auto-inject rules into CLAUDE.md
 - Project environment auto-detection

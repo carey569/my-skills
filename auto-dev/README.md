@@ -44,8 +44,8 @@ cd ~/.claude/autodev-skills && git pull && bash install.sh
 | `/auto-dev-run` | 自动编码验证循环 | Phase C 执行 |
 | `/auto-dev-report` | 验收报告 | 验收阶段 |
 | `/auto-dev-resume` | 恢复中断的流程 | 中断后继续 |
-| `/fix-bug` | Bug 修复流程 | 先复现再修复，test-first |
-| `/add-feature` | 新功能添加 | 在已有模块上扩展功能 |
+| `/auto-dev-fix` | Bug 修复流程 | 先复现再修复，test-first |
+| `/auto-dev-feature` | 新功能添加 | 在已有模块上扩展功能 |
 
 ## 快速开始
 

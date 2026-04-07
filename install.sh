@@ -52,7 +52,7 @@ if [[ "${1:-}" == "--uninstall" ]]; then
 
     # Remove command symlinks
     if [[ -d "$COMMANDS_DIR" ]]; then
-        for target in "$COMMANDS_DIR"/auto-dev*.md "$COMMANDS_DIR"/fix-bug.md "$COMMANDS_DIR"/add-feature.md; do
+        for target in "$COMMANDS_DIR"/auto-dev*.md; do
             [[ -e "$target" || -L "$target" ]] || continue
             rm -f "$target"
             info "Removed: $(basename "$target")"
@@ -135,7 +135,16 @@ for cmd in "$SOURCE_DIR"/auto-dev/commands/*.md; do
     info "Linked: $name"
 done
 
-# 3. Clean up legacy CLAUDE.md injection (from v0.1.0 / v0.2.0)
+# 3. Clean up legacy command names (fix-bug, add-feature → auto-dev-fix, auto-dev-feature)
+for legacy in fix-bug.md add-feature.md; do
+    legacy_target="$COMMANDS_DIR/$legacy"
+    if [[ -e "$legacy_target" || -L "$legacy_target" ]]; then
+        rm -f "$legacy_target"
+        info "Removed legacy command: $legacy"
+    fi
+done
+
+# 4. Clean up legacy CLAUDE.md injection (from v0.1.0 / v0.2.0)
 #    v0.3.0+ no longer injects into CLAUDE.md — commands are self-contained
 CLAUDE_MD="$HOME/.claude/CLAUDE.md"
 if [[ -f "$CLAUDE_MD" ]] && grep -qF "<!-- auto-dev rules BEGIN" "$CLAUDE_MD" 2>/dev/null; then
@@ -144,7 +153,7 @@ if [[ -f "$CLAUDE_MD" ]] && grep -qF "<!-- auto-dev rules BEGIN" "$CLAUDE_MD" 2>
     info "Cleaned legacy rules from CLAUDE.md (no longer needed)"
 fi
 
-# 4. Done
+# 5. Done
 echo ""
 echo "Done! Available commands:"
 echo "  /auto-dev            Full development & verification workflow"
@@ -153,7 +162,7 @@ echo "  /auto-dev-spec       Test spec generation"
 echo "  /auto-dev-run        Auto coding & verification loop"
 echo "  /auto-dev-report     Acceptance report"
 echo "  /auto-dev-resume     Resume interrupted workflow"
-echo "  /fix-bug             Bug fix workflow"
-echo "  /add-feature         New feature workflow"
+echo "  /auto-dev-fix        Bug fix workflow"
+echo "  /auto-dev-feature    New feature workflow"
 echo ""
 echo "Usage:  Type /auto-dev in Claude Code to start"
