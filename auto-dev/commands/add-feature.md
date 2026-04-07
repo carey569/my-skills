@@ -6,18 +6,7 @@
 
 ## Step 0: 探测项目环境
 
-1. 检查项目根目录是否存在 `.auto-dev.yaml`。
-   - 如果存在 → 读取其中的 `language`、`test_cmd`、`build_cmd`、`verify_cmd`、`architecture` 等配置。
-   - 如果不存在 → 自动探测：
-     - 扫描项目文件后缀和配置文件（go.mod / package.json / Cargo.toml / pom.xml / pyproject.toml / requirements.txt 等）确定语言。
-     - 根据语言推断默认测试命令：
-       - Go → `go test ./...`
-       - Python → `pytest`
-       - TypeScript/JavaScript → `npm test` 或 `npx jest`
-       - Rust → `cargo test`
-       - Java (Maven) → `mvn test` / Java (Gradle) → `gradle test`
-2. 检查是否存在 `scripts/verify.sh`，记录备用。
-3. 检查是否存在 `test-specs/` 目录，没有则在后续步骤中创建。
+按 auto-dev 环境探测规则执行（见 auto-dev rules 中的「环境探测规则」段落）。额外检查 `test-specs/` 目录是否存在，没有则在后续步骤中创建。
 
 ---
 
@@ -86,23 +75,29 @@
 
 ### 3.2 生成测试规格
 
-生成或追加 `test-specs/<feature-name>.yaml`，格式示例：
+生成或追加 `test-specs/<feature-name>.yaml`，格式与 `/auto-dev-spec` 一致：
 
 ```yaml
-feature: <功能名称>
+spec_id: FEAT-XXX
+title: <功能名称>
+module: <模块路径>
+approved: false
+
 cases:
-  - name: "正常流程 - 基本功能"
-    precondition: "..."
-    input: "..."
-    expected: "..."
-  - name: "边界情况 - 空输入"
-    precondition: "..."
-    input: "..."
-    expected: "..."
-  - name: "错误处理 - 无效参数"
-    precondition: "..."
-    input: "..."
-    expected: "..."
+  - id: TC-001
+    name: "正常流程_基本功能"
+    description: "..."
+    preconditions: ["..."]
+    input:
+      key: "value"
+    expect: ["..."]
+    priority: P0
+  - id: TC-002
+    name: "边界情况_空输入"
+    description: "..."
+    input: {}
+    expect: ["..."]
+    priority: P1
 ```
 
 ### 3.3 补充集成验证（如果适用）
@@ -112,6 +107,8 @@ cases:
 ### 3.4 用户审查
 
 **请用户审查验收用例并冻结**。冻结后测试规格不可修改，作为实现阶段的验收标准。
+
+冻结时计算 SHA-256 校验和，写入 `.auto-dev.yaml` 的 `frozen_checksums`。
 
 ---
 
@@ -158,7 +155,7 @@ for round in 1..5:
 
 所有新功能测试通过后：
 
-1. 如果项目有 `.auto-dev.yaml` 且配置了 `test_cmd` → 运行全量测试。
+1. 如果项目有 `.auto-dev.yaml` 且配置了 `commands.test` → 运行全量测试。
 2. 否则 → 运行探测到的默认测试命令。
 3. 回归测试失败 → 分析是否是新功能导致的，尝试修复（仍在 5 轮限制内）。
 
@@ -189,6 +186,9 @@ for round in 1..5:
 - 新功能测试：PASS（XX 个用例全部通过）
 - 回归测试：PASS（XX 个测试全部通过）
 - 集成验证：PASS / 跳过
+
+### 冻结文件校验
+- SHA-256 校验: 通过 ✓
 
 ### 注意事项
 - <部署注意事项、配置变更、数据库迁移等>

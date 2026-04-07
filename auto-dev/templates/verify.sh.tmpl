@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # verify.sh — 端到端验证脚本
-# 由 /auto-dev spec 根据项目技术栈生成，人审批后冻结
+# 由 /auto-dev-spec 根据项目技术栈生成，人审批后冻结
 set -euo pipefail
 
 # ============================================================
@@ -39,12 +39,43 @@ inject() {
 }
 
 # ============================================================
+# Phase 0: 冻结文件校验
+# ============================================================
+
+echo "=== Phase 0: 冻结文件校验 ==="
+
+# 校验冻结文件的完整性
+# 从 .auto-dev.yaml 读取 frozen_checksums 并验证
+if [ -f ".auto-dev.yaml" ]; then
+  FROZEN_OK=true
+  # TODO: 由 /auto-dev-spec 根据 frozen_files 和 frozen_checksums 填充
+  # 示例:
+  # EXPECTED="a1b2c3d4..."
+  # ACTUAL=$(shasum -a 256 test-specs/xxx.yaml | awk '{print $1}')
+  # if [ "$EXPECTED" != "$ACTUAL" ]; then
+  #   echo "FAIL: test-specs/xxx.yaml checksum mismatch"
+  #   FROZEN_OK=false
+  # fi
+
+  if [ "$FROZEN_OK" = true ]; then
+    echo "  All frozen files verified ✓"
+  else
+    echo "  ERROR: Frozen file integrity check failed!"
+    echo "  Aborting verification — frozen files may have been tampered with."
+    exit 2
+  fi
+else
+  echo "  No .auto-dev.yaml found, skipping frozen file check"
+fi
+
+# ============================================================
 # Phase 1: 基础设施检查
 # ============================================================
 
+echo ""
 echo "=== Phase 1: 基础设施检查 ==="
 
-# TODO: 由 /auto-dev spec 根据 .auto-dev.yaml 中的 infra 配置填充
+# TODO: 由 /auto-dev-spec 根据 .auto-dev.yaml 中的 infra 配置填充
 # 示例:
 # check "database-connection"  docker compose exec db pg_isready
 # check "redis-ping"           docker compose exec cache redis-cli ping
@@ -57,7 +88,7 @@ echo "=== Phase 1: 基础设施检查 ==="
 echo ""
 echo "=== Phase 2: 测试数据准备 ==="
 
-# TODO: 由 /auto-dev spec 根据 test-specs 填充
+# TODO: 由 /auto-dev-spec 根据 test-specs 填充
 # 示例:
 # inject "http://localhost:8080/test/seed" fixtures/seed.json
 
@@ -70,7 +101,7 @@ echo "(no test data steps configured)"
 echo ""
 echo "=== Phase 3: 功能验证 ==="
 
-# TODO: 由 /auto-dev spec 根据 test-specs 中的验收条件填充
+# TODO: 由 /auto-dev-spec 根据 test-specs 中的验收条件填充
 # 每个 spec 对应一个或多个 check 调用
 # 示例:
 # check "create-user"    curl -sf -X POST http://localhost:8080/api/users -d '{"name":"test"}'
@@ -83,7 +114,7 @@ echo "=== Phase 3: 功能验证 ==="
 echo ""
 echo "=== Phase 4: 日志链路检查 ==="
 
-# TODO: 由 /auto-dev spec 根据项目的日志/可观测性配置填充
+# TODO: 由 /auto-dev-spec 根据项目的日志/可观测性配置填充
 # 示例:
 # check "no-error-logs"  bash -c '! docker compose logs --tail=50 app | grep -i "error\|panic\|fatal"'
 

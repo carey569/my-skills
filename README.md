@@ -24,6 +24,15 @@ git pull
 bash install.sh
 ```
 
+Re-running `install.sh` auto-replaces old rules via BEGIN/END markers.
+
+## Uninstall
+
+```bash
+cd ~/.claude/skills
+bash install.sh --uninstall
+```
+
 ## License
 
 MIT

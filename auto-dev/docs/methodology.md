@@ -49,6 +49,7 @@
 审批后：
 - test-spec 标记 `approved: true`
 - 相关文件加入 `frozen_files` 列表
+- 计算 SHA-256 校验和，写入 `frozen_checksums`
 - 进入全自动阶段
 
 **S/M 级别任务**：简化审批流程，直接确认测试思路即可。
@@ -58,11 +59,15 @@
 **目标**：AI 全自动完成实现和验证，无需人工介入。
 
 执行流程：
-1. Agent T 根据冻结的 test-spec 生成测试代码
-2. Agent C 根据需求和接口定义编写实现代码
-3. 运行测试 -> 失败则进入自愈循环
-4. 全量测试通过后运行 verify.sh
-5. 所有验证通过 -> 进入 Phase D
+1. 校验冻结文件完整性（SHA-256）
+2. Agent T 根据冻结的 test-spec 生成测试代码
+3. Agent C 根据需求和接口定义编写实现代码
+4. 运行测试 -> 失败则进入自愈循环
+5. 全量测试通过后运行 verify.sh
+6. 再次校验冻结文件完整性
+7. 所有验证通过 -> 进入 Phase D
+
+**进度恢复**：Phase C 的每一步都记录到 `.progress/status.md`。如果中断，可通过 `/auto-dev-resume` 从中断位置继续。
 
 ### Phase D: 验收报告
 
@@ -71,6 +76,7 @@
 输出验收报告：
 - 实现摘要（改了什么，为什么这样改）
 - 测试结果（通过率、覆盖情况）
+- 冻结文件校验结果
 - 回归风险评估
 - 待人工确认的事项（如有）
 
@@ -134,14 +140,28 @@ auto-dev 采用第三种模式。
 - 如果测试失败，只能修改实现代码，不能调整测试
 - 如果确实需要改测试（如发现 test-spec 本身有误），必须退回 Phase B 重新审批
 
-### 在 .auto-dev.yaml 中的体现
+### 技术强制：SHA-256 校验
+
+v0.2.0 起，冻结不再仅靠 AI 自律，而是通过 SHA-256 校验和强制保障：
 
 ```yaml
+# .auto-dev.yaml
 frozen_files:
   - test-specs/user-service.yaml
   - internal/user/service_test.go
   - scripts/verify.sh
+
+frozen_checksums:
+  "test-specs/user-service.yaml": "a1b2c3d4..."
+  "internal/user/service_test.go": "e5f6g7h8..."
+  "scripts/verify.sh": "i9j0k1l2..."
 ```
+
+校验时机：
+- Phase C 入口（`/auto-dev-run` 开始前）
+- Phase C 出口（生成报告前）
+- 每 2 轮自愈循环
+- verify.sh 执行时（Phase 0 步骤）
 
 ---
 
@@ -190,6 +210,35 @@ frozen_files:
 
 ---
 
+## 进度恢复
+
+v0.2.0 新增进度恢复机制，解决"中途退出会话后无法继续"的问题。
+
+### 进度文件
+
+`.progress/status.md` 记录：
+- 任务描述（用户原始需求）
+- 当前状态和阶段
+- 测试进度
+- 每轮自愈的修改记录
+
+### 恢复流程
+
+1. `/auto-dev` 入口自动检测 `.progress/status.md`
+2. 如果存在未完成任务 → 提示用户选择继续或重新开始
+3. `/auto-dev-resume` 可显式触发恢复
+
+### 各阶段恢复策略
+
+| 中断阶段 | 恢复策略 |
+|----------|---------|
+| Phase A | 重新执行（成本低） |
+| Phase B | 重新展示 test-specs 请审批 |
+| Phase C | 校验冻结文件 → 从中断轮次继续 |
+| Phase D | 重新生成报告 |
+
+---
+
 ## 测试注入机制
 
 解决"AI 无法访问真实外部服务"的问题。
@@ -207,6 +256,9 @@ verify.sh 是 "最后一道防线"，弥补单元测试无法覆盖的场景：
 ```bash
 #!/bin/bash
 set -euo pipefail
+
+# Phase 0: 冻结文件校验
+# ... (SHA-256 校验)
 
 # 启动服务
 docker-compose up -d
@@ -240,6 +292,7 @@ echo "All verifications passed"
 - 全部集成测试通过（如有）
 - verify.sh 通过（如有）
 - 无编译/lint 错误
+- 冻结文件校验通过
 
 ### 异常终止（需人工介入）
 
@@ -249,6 +302,7 @@ echo "All verifications passed"
 | test-spec 本身有误 | 退回 Phase B 重新审批 |
 | 环境问题（docker 启动失败等） | 暂停，请用户检查环境 |
 | 需求歧义 | 暂停，请用户澄清 |
+| 冻结文件被篡改 | 立即暂停，报告校验失败 |
 
 ### 升级路径
 
@@ -286,6 +340,12 @@ echo "All verifications passed"
 | 集成测试 | PASS / 跳过 | <详情> |
 | verify.sh | PASS / 跳过 | <详情> |
 | lint | PASS | 无警告 |
+
+### 冻结文件校验
+| 文件 | SHA-256 | 状态 |
+|------|---------|------|
+| test-specs/xxx.yaml | a1b2c3... | ✓ 匹配 |
+| scripts/verify.sh | e5f6g7... | ✓ 匹配 |
 
 ### 自愈记录
 | 轮次 | 失败原因 | 修复动作 |

@@ -11,24 +11,29 @@ auto-dev 检测到 `package.json` + `.ts`/`.tsx` 后生成：
 ```yaml
 # .auto-dev.yaml
 project:
+  name: "my-fullstack-app"
   language: "typescript"
-  test_cmd: "npm test"
-  build_cmd: "npm run build"
-  lint_cmd: "npm run lint"
+  root: "."
+commands:
+  test: "npm test"
+  build: "npm run build"
+  lint: "npm run lint"
 infra:
   container: docker-compose
   compose_file: "docker-compose.yaml"
-  database: postgres
-  cache: redis
+  databases: [postgres]
+  caches: [redis]
 ```
 
 ## test-spec 示例
 
 ```yaml
 # test-specs/user-service.yaml
+spec_id: FEAT-001
+title: "用户服务"
 module: "packages/backend/src/services"
 approved: false
-specs:
+cases:
   - name: "test_create_user_returns_user_with_id"
     desc: "创建用户成功，返回带 ID 的用户对象"
     input: { body: { name: "Alice", email: "new@test.com" } }

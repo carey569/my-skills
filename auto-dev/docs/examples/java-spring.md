@@ -11,24 +11,29 @@ auto-dev 检测到 `pom.xml` + Spring Boot 依赖后生成：
 ```yaml
 # .auto-dev.yaml
 project:
+  name: "myapp"
   language: "java"
-  test_cmd: "mvn test"
-  build_cmd: "mvn package -DskipTests"
-  lint_cmd: "mvn checkstyle:check"
+  root: "."
+commands:
+  test: "mvn test"
+  build: "mvn package -DskipTests"
+  lint: "mvn checkstyle:check"
 infra:
   container: docker-compose
   compose_file: "docker-compose.yaml"
-  database: mysql
-  cache: redis
+  databases: [mysql]
+  caches: [redis]
 ```
 
 ## test-spec 示例
 
 ```yaml
 # test-specs/user-service.yaml
+spec_id: FEAT-001
+title: "用户服务"
 module: "src/main/java/com/example/myapp/service"
 approved: false
-specs:
+cases:
   - name: "test_create_user_success"
     desc: "正常创建用户，返回带 ID 的对象"
     input: { request: { name: "Alice", email: "new@test.com" } }

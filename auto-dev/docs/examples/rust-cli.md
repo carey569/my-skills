@@ -11,23 +11,28 @@ auto-dev 检测到 `Cargo.toml` 及 clap/serde 依赖后生成：
 ```yaml
 # .auto-dev.yaml
 project:
+  name: "mytool"
   language: "rust"
-  test_cmd: "cargo test"
-  build_cmd: "cargo build"
-  lint_cmd: "cargo clippy -- -D warnings"
+  root: "."
+commands:
+  test: "cargo test"
+  build: "cargo build"
+  lint: "cargo clippy -- -D warnings"
 infra:
   container: null
-  database: null
-  cache: null
+  databases: []
+  caches: []
 ```
 
 ## test-spec 示例
 
 ```yaml
 # test-specs/convert-command.yaml
+spec_id: FEAT-001
+title: "convert 命令"
 module: "src/commands/convert"
 approved: false
-specs:
+cases:
   - name: "test_convert_json_to_toml"
     desc: "将 JSON 文件转换为 TOML 格式输出"
     input:

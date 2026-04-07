@@ -11,24 +11,29 @@ auto-dev 检测到 `go.mod` + `docker-compose.yaml` 后生成：
 ```yaml
 # .auto-dev.yaml
 project:
+  name: "my-go-service"
   language: "go"
-  test_cmd: "go test ./..."
-  build_cmd: "go build ./cmd/server"
-  lint_cmd: "golangci-lint run"
+  root: "."
+commands:
+  test: "go test ./..."
+  build: "go build ./cmd/server"
+  lint: "golangci-lint run"
 infra:
   container: docker-compose
   compose_file: "docker-compose.yaml"
-  database: mysql
-  cache: redis
+  databases: [mysql]
+  caches: [redis]
 ```
 
 ## test-spec 示例
 
 ```yaml
 # test-specs/user-service.yaml
+spec_id: FEAT-001
+title: "用户服务"
 module: "internal/service"
 approved: false
-specs:
+cases:
   - name: "test_create_user_success"
     desc: "正常创建用户，返回用户 ID"
     input: { name: "alice", email: "alice@example.com" }

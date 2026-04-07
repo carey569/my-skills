@@ -6,17 +6,7 @@
 
 ## Step 0: 探测项目环境
 
-1. 检查项目根目录是否存在 `.auto-dev.yaml`。
-   - 如果存在 → 读取其中的 `language`、`test_cmd`、`build_cmd`、`verify_cmd` 等配置。
-   - 如果不存在 → 自动探测：
-     - 扫描项目文件后缀和配置文件（go.mod / package.json / Cargo.toml / pom.xml / pyproject.toml / requirements.txt 等）确定语言。
-     - 根据语言推断默认测试命令：
-       - Go → `go test ./...`
-       - Python → `pytest`
-       - TypeScript/JavaScript → `npm test` 或 `npx jest`
-       - Rust → `cargo test`
-       - Java (Maven) → `mvn test` / Java (Gradle) → `gradle test`
-2. 检查是否存在 `scripts/verify.sh`，记录备用。
+按 auto-dev 环境探测规则执行（见 auto-dev rules 中的「环境探测规则」段落）。
 
 ---
 
@@ -90,7 +80,7 @@ for round in 1..5:
 
 复现测试通过后：
 
-1. 如果项目有 `.auto-dev.yaml` 且配置了 `test_cmd` → 运行全量测试。
+1. 如果项目有 `.auto-dev.yaml` 且配置了 `commands.test` → 运行全量测试。
 2. 否则 → 运行探测到的默认测试命令。
 3. 如果存在 `scripts/verify.sh` → 运行集成验证。
 4. 所有测试通过 → 进入报告阶段。

@@ -11,23 +11,28 @@ auto-dev 检测到 `pyproject.toml` 和 Click/Typer 依赖后生成：
 ```yaml
 # .auto-dev.yaml
 project:
+  name: "mytool"
   language: "python"
-  test_cmd: "pytest"
-  build_cmd: "pip install -e ."
-  lint_cmd: "ruff check ."
+  root: "."
+commands:
+  test: "pytest"
+  build: "pip install -e ."
+  lint: "ruff check ."
 infra:
   container: null
-  database: sqlite
-  cache: null
+  databases: [sqlite]
+  caches: []
 ```
 
 ## test-spec 示例
 
 ```yaml
 # test-specs/cli-add-command.yaml
+spec_id: FEAT-001
+title: "CLI add 命令"
 module: "src/mytool/commands/add"
 approved: false
-specs:
+cases:
   - name: "test_add_item_success"
     desc: "添加记录成功，输出确认信息"
     input:
