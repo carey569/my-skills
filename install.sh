@@ -14,7 +14,7 @@
 set -euo pipefail
 
 REPO_NAME="my-skills"
-INSTALL_DIR="${CLAUDE_SKILLS_DIR:-$HOME/.claude/$REPO_NAME}"
+INSTALL_DIR="${CLAUDE_SKILLS_DIR:-$HOME/.claude/autodev-skills}"
 REPO_URL="git@github.com:carey569/my-skills.git"
 COMMANDS_DIR="$HOME/.claude/commands"
 

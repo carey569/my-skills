@@ -21,8 +21,8 @@ curl -fsSL https://raw.githubusercontent.com/carey569/my-skills/master/install.s
 **手动安装：**
 
 ```bash
-git clone git@github.com:carey569/my-skills.git ~/.claude/my-skills
-cd ~/.claude/my-skills
+git clone git@github.com:carey569/my-skills.git ~/.claude/autodev-skills
+cd ~/.claude/autodev-skills
 bash install.sh
 ```
 
@@ -246,7 +246,7 @@ L/XL 级别任务中，测试和实现由两个独立 Agent 完成：
 ## 升级
 
 ```bash
-cd ~/.claude/my-skills
+cd ~/.claude/autodev-skills
 git pull
 bash install.sh
 ```
@@ -262,7 +262,7 @@ curl -fsSL https://raw.githubusercontent.com/carey569/my-skills/master/install.s
 ## 卸载
 
 ```bash
-bash ~/.claude/my-skills/install.sh --uninstall
+bash ~/.claude/autodev-skills/install.sh --uninstall
 ```
 
 或远程卸载：
@@ -271,7 +271,7 @@ bash ~/.claude/my-skills/install.sh --uninstall
 curl -fsSL https://raw.githubusercontent.com/carey569/my-skills/master/install.sh | bash -s -- --uninstall
 ```
 
-仅移除符号链接，不删除仓库目录。如需完全移除：`rm -rf ~/.claude/my-skills`。
+仅移除符号链接，不删除仓库目录。如需完全移除：`rm -rf ~/.claude/autodev-skills`。
 
 ## 更多文档
 
