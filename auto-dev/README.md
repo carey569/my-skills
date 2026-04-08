@@ -40,7 +40,8 @@ cd ~/.claude/autodev-skills && git pull && bash install.sh
 |------|------|---------|
 | `/auto-dev` | 完整开发验证流程（自动路由到子命令） | 新模块开发、功能实现 |
 | `/auto-dev-init` | 项目环境探测 | 首次使用、新项目初始化 |
-| `/auto-dev-spec` | 测试规格生成 | 需求分析、test-spec 定义 |
+| `/auto-dev-design` | 设计方案生成 | 架构设计、接口定义、人审批 |
+| `/auto-dev-spec` | 测试规格生成 | 从已审批设计生成 test-spec |
 | `/auto-dev-run` | 自动编码验证循环 | Phase C 执行 |
 | `/auto-dev-report` | 验收报告 | 验收阶段 |
 | `/auto-dev-resume` | 恢复中断的流程 | 中断后继续 |
@@ -57,7 +58,8 @@ cd ~/.claude/autodev-skills && git pull && bash install.sh
 #    检查语言、测试命令、基础设施配置
 
 # 3. 描述你的需求，auto-dev 会：
-#    - 生成 test-spec → 请你审批
+#    - 生成设计方案 → 请你审批
+#    - 从设计方案生成 test-spec → 请你审批
 #    - Agent T 写测试 → Agent C 写实现
 #    - 自愈循环验证 → 输出验收报告
 
@@ -96,6 +98,8 @@ policy:
 
 frozen_files: []
 frozen_checksums: {}
+
+designs_dir: designs
 ```
 
 如果项目中没有该文件，auto-dev 会自动探测并生成。
@@ -137,10 +141,12 @@ modules:
 ## 工作流程
 
 ```
-Phase A: 需求分析 & 环境探测
+Phase A: 需求分析 & 设计方案
   +--------------------------+
   | 读取需求 → 探测项目环境  |
   | 评估复杂度 (S/M/L/XL)   |
+  | 生成设计方案             |
+  | 人审批 → 冻结设计方案    |  <-- 人类审批
   | 生成 test-spec           |
   +--------------------------+
             |
@@ -200,7 +206,7 @@ A: 直接让 AI 写代码是"球员兼裁判"——自己写自己测。auto-dev
 A: auto-dev 会停止执行，输出每轮的尝试和失败原因，请你介入。你可以调整 test-spec、放宽断言条件，或手动提示修复方向。
 
 **Q: frozen_files 是什么？为什么不能改？**
-A: 这是 Phase B 人工审批后冻结的文件列表，包括 test-spec、测试代码和 verify.sh。冻结保证"验收标准不被实现者篡改"，这是整个方法论的核心约束。v0.2.0 起通过 SHA-256 校验和强制保障。
+A: 这是人工审批后冻结的文件列表，包括设计方案、test-spec、测试代码和 verify.sh。冻结保证"设计决策和验收标准不被实现者篡改"，这是整个方法论的核心约束。v0.2.0 起通过 SHA-256 校验和强制保障。
 
 **Q: 小改动也需要走完整流程吗？**
 A: 不需要。S 级任务（单文件、逻辑简单）直接实现并跑已有测试即可。完整流程只在 L/XL 级别任务中启用。

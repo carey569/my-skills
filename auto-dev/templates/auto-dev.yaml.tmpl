@@ -43,8 +43,9 @@ policy:
 #       test: "go test ./..."
 #       build: "go build ./cmd/server"
 
-frozen_files: []              # Phase B 审批后自动追加
+frozen_files: []              # 设计审批和 Phase B 审批后自动追加
 frozen_checksums: {}          # frozen_files 的 SHA-256 校验和
 
+designs_dir: designs
 test_specs_dir: test-specs
 progress_dir: .progress

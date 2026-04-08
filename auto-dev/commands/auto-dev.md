@@ -13,7 +13,8 @@
 | 输入 | 动作 |
 |------|------|
 | `/auto-dev init` | 探测项目环境，生成 `.auto-dev.yaml`（执行 `/auto-dev-init`） |
-| `/auto-dev spec` | 从需求/设计文档生成 test-specs（执行 `/auto-dev-spec`） |
+| `/auto-dev design` | 生成设计方案，人审批后冻结（执行 `/auto-dev-design`） |
+| `/auto-dev spec` | 从已审批的设计方案生成 test-specs（执行 `/auto-dev-spec`） |
 | `/auto-dev run` | 执行 Phase C 自动编码验证循环（执行 `/auto-dev-run`） |
 | `/auto-dev report` | 输出验收报告（执行 `/auto-dev-report`） |
 | `/auto-dev resume` | 恢复上次中断的流程（执行 `/auto-dev-resume`） |
@@ -67,8 +68,8 @@
 流程：Phase A → B → C
 
 步骤：
-1. **Phase A**：分析需求，生成 test-specs（执行 `/auto-dev-spec`）
-2. **Phase B**：请用户审查 test-specs，审批后冻结
+1. **Phase A**：分析需求，生成设计方案（执行 `/auto-dev-design`），人审批后冻结
+2. **Phase B**：从已审批的设计方案生成 test-specs（执行 `/auto-dev-spec`），人审批后冻结
 3. **Phase C**：执行自动编码验证循环（执行 `/auto-dev-run`）
 
 ### XL — 系统级（新项目/系统重构）
@@ -76,8 +77,8 @@
 流程：Phase A → B → C → D
 
 步骤：
-1. **Phase A**：探测环境 + 生成配置（执行 `/auto-dev-init` + `/auto-dev-spec`）
-2. **Phase B**：请用户审查全部规格和方案，审批后冻结
+1. **Phase A**：探测环境 + 生成配置（执行 `/auto-dev-init`），生成设计方案（执行 `/auto-dev-design`），人审批后冻结
+2. **Phase B**：从已审批的设计方案生成 test-specs（执行 `/auto-dev-spec`），人审批后冻结
 3. **Phase C**：分模块执行自动编码验证循环（执行 `/auto-dev-run`）
 4. **Phase D**：集成测试 + 验收报告（执行 `/auto-dev-report`）
 

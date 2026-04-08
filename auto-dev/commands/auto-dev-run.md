@@ -9,8 +9,9 @@
 ### 1. 前置检查
 
 - 加载 `.auto-dev.yaml`，获取 `commands.test`、`commands.build`、`infra`、`policy` 等配置
+- 加载 `designs/` 下已审批的设计文档（作为实现参考）
 - 加载 `test-specs/` 下所有 `.yaml` 文件
-- **校验冻结文件完整性**：对 `frozen_files` 中的每个文件计算 SHA-256，与 `frozen_checksums` 比对。不一致则暂停并报告
+- **校验冻结文件完整性**：对 `frozen_files` 中的每个文件（包括设计文档、test-specs、verify.sh）计算 SHA-256，与 `frozen_checksums` 比对。不一致则暂停并报告
 - 初始化 `.progress/status.md`
 
 ### 2. Agent T — 生成测试代码
@@ -27,7 +28,7 @@
 
 ### 3. Agent C — 编写实现代码
 
-- 读取测试代码和 test-specs，理解需要实现的功能
+- 读取设计文档、测试代码和 test-specs，理解需要实现的功能和设计约束
 - **先理解再动手**：修改任何代码前，必须先读取相关文件理解上下文
 - 编写实现代码，使所有测试通过
 - 遵守冻结边界规则，只修改允许修改的文件
